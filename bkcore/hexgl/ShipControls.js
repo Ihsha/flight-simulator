@@ -127,23 +127,49 @@ bkcore.hexgl.ShipControls = function(ctx)
 		if(bkcore.controllers.OrientationController.isCompatible())
 		{
 			this.orientationController = new bkcore.controllers.OrientationController(domElement, false);
-		}
-
-		this.touchController = new bkcore.controllers.TouchController(
-			domElement, ctx.width/2,
-			function(state, touch, event){
-				if(event.touches.length >= 4)
-					window.location.reload(false);
-				else if(event.touches.length == 3)
-					ctx.restart();
-				// touch was on the LEFT-hand side of the screen
-				else if (touch.clientX < (ctx.width / 2)) {
-					if (event.type === 'touchend')
-						self.key.forward = false;
-					else
-						self.key.forward = true;
+			
+			var handleTouch = function(event, state) {
+				var touches = event.touches;
+				var leftTouchActive = false;
+				for(var i=0; i<touches.length; ++i) {
+					if(touches[i].clientX < (window.innerWidth / 2)) {
+						leftTouchActive = true;
+						break;
+					}
 				}
-			});
+				self.key.forward = leftTouchActive;
+			};
+			
+			domElement.addEventListener('touchstart', function(e) {
+				handleTouch(e, true);
+			}, false);
+			
+			domElement.addEventListener('touchmove', function(e) {
+				handleTouch(e, self.key.forward);
+			}, false);
+			
+			domElement.addEventListener('touchend', function(e) {
+				handleTouch(e, false);
+			}, false);
+		}
+		else
+		{
+			this.touchController = new bkcore.controllers.TouchController(
+				domElement, ctx.width/2,
+				function(state, touch, event){
+					if(event.touches.length >= 4)
+						window.location.reload(false);
+					else if(event.touches.length == 3)
+						ctx.restart();
+					// touch was on the right-hand side of the screen
+					else if (touch.clientX > (ctx.width / 2)) {
+						if (event.type === 'touchend')
+							self.key.forward = false;
+						else
+							self.key.forward = true;
+					}
+				});
+		}
 	}
 	else if(ctx.controlType == 4 && bkcore.controllers.OrientationController.isCompatible())
 	{
