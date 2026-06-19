@@ -64,7 +64,37 @@
     _fn(a);
   }
 
+  var requestFullscreenAndOrientation = function() {
+    // 1. Request DeviceOrientation permission for iOS
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(function(permissionState) {
+          if (permissionState === 'granted') {
+            console.log("DeviceOrientation permission granted.");
+          }
+        })
+        .catch(console.error);
+    }
+
+    // 2. Request Fullscreen
+    var docEl = document.documentElement;
+    var requestFS = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+    if (requestFS) {
+      requestFS.call(docEl).then(function() {
+        // 3. Lock orientation to landscape
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(function(err) {
+            console.warn("Orientation lock failed: ", err);
+          });
+        }
+      }).catch(function(err) {
+        console.warn("Fullscreen request failed: ", err);
+      });
+    }
+  };
+
   $('step-2').onclick = function() {
+    requestFullscreenAndOrientation();
     $('step-2').style.display = 'none';
     $('step-3').style.display = 'block';
     return init(s[0][3], s[1][3], s[2][3], s[3][3]);
@@ -107,6 +137,7 @@
     };
   } else {
     $('start').onclick = function() {
+      requestFullscreenAndOrientation();
       $('step-1').style.display = 'none';
       $('step-2').style.display = 'block';
       return $('step-2').style.backgroundImage = "url(css/help-" + s[0][3] + ".png)";

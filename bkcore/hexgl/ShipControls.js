@@ -124,6 +124,11 @@ bkcore.hexgl.ShipControls = function(ctx)
 
 	if(ctx.controlType == 1 && bkcore.controllers.TouchController.isCompatible())
 	{
+		if(bkcore.controllers.OrientationController.isCompatible())
+		{
+			this.orientationController = new bkcore.controllers.OrientationController(domElement, false);
+		}
+
 		this.touchController = new bkcore.controllers.TouchController(
 			domElement, ctx.width/2,
 			function(state, touch, event){
@@ -131,8 +136,8 @@ bkcore.hexgl.ShipControls = function(ctx)
 					window.location.reload(false);
 				else if(event.touches.length == 3)
 					ctx.restart();
-				// touch was on the right-hand side of the screen
-				else if (touch.clientX > (ctx.width / 2)) {
+				// touch was on the LEFT-hand side of the screen
+				else if (touch.clientX < (ctx.width / 2)) {
 					if (event.type === 'touchend')
 						self.key.forward = false;
 					else
@@ -390,8 +395,16 @@ bkcore.hexgl.ShipControls.prototype.update = function(dt)
 
 		if(this.touchController != null)
 		{
-			angularAmount -= this.touchController.stickVector.x/100 * this.angularSpeed * dt;
-			rollAmount += this.touchController.stickVector.x/100 * this.rollAngle;
+			if(this.orientationController != null)
+			{
+				angularAmount += this.orientationController.beta/45 * this.angularSpeed * dt;
+				rollAmount -= this.orientationController.beta/45 * this.rollAngle;
+			}
+			else
+			{
+				angularAmount -= this.touchController.stickVector.x/100 * this.angularSpeed * dt;
+				rollAmount += this.touchController.stickVector.x/100 * this.rollAngle;
+			}
 		}
 		else if(this.orientationController != null)
 		{
