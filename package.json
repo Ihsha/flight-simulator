@@ -1,0 +1,17 @@
+{
+  "name": "hexgl",
+  "version": "1.0.0",
+  "description": "Futuristic HTML5 racing game built with Three.js",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000"
+  },
+  "keywords": [
+    "three.js",
+    "webgl",
+    "racing",
+    "game"
+  ],
+  "author": "Thibaut Despoulain (BKcore)",
+  "license": "MIT"
+}
